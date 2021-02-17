@@ -22,27 +22,15 @@ class CitynameServiceProvider extends ServiceProvider
         {
             $returnArray[] = [
                 'label' => $cityList->city_name,
-                'value' => $cityList->latitude.','.$cityList->longitude
+                'value' => $cityList->id
             ];
         }
         return $returnArray;
     }
 
-    /**
-     * @param $param
-     * @return array
-     */
-    public function getCityNamesMatch($param)
+    public static function isValidCity($cityName)
     {
-        $returnArray = [];
-        $cities = CityList::all()->take(5);
-        foreach($cities as $cityList)
-        {
-            $returnArray[] = [
-                'label' => $cityList->city_name,
-                'value' => $cityList->latitude.','.$cityList->longitude
-            ];
-        }
-        return $returnArray;
+        return CityList::where('city_name', $cityName)
+                ->count() === 1;
     }
 }

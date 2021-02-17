@@ -15,4 +15,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/city', [\App\Http\Controllers\ApiRequestController::class, 'cityList']);
-Route::get('/forecast', [\App\Http\Controllers\ApiRequestController::class, 'forecastList']);
+Route::get('/forecast/', [\App\Http\Controllers\ApiRequestController::class, 'forecastList']);

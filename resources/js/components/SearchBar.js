@@ -1,6 +1,5 @@
 import React from 'react';
 import Select from 'react-select';
-import EventEmitter from "EventEmitter";
 
 class SearchBar extends React.Component{
 
@@ -9,14 +8,14 @@ class SearchBar extends React.Component{
     }
 
     handleChange = (selection) => {
-        this.setState({selection});
-        EventEmitter.emit('getForecastData', this.state.selection);
+        this.setState({selection})
+        this.props.getForecastData(selection)
     }
 
     render() {
         return (
             <Select
-                defaultValue={''}
+                defaultValue={{label:'Sydney'}}
                 options={this.props.citiesList}
                 onChange={this.handleChange}
             />
