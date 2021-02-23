@@ -6,7 +6,7 @@ for the next 5 days for any city
 </p>
 <h2>Installation Instructions</h2>
 <p>Clone the repository</p>
-<code>git clone</code>
+<code>gh repo clone justinmathew89/weather-app</code>
 <p>Configure the database in <code>config/database.php</code> the current configuration on mysql is</p>
 <code>
             'database' => env('DB_DATABASE', 'weather_app_prod_db'),<br>
