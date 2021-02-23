@@ -27,3 +27,14 @@ that are required for the react app to run</p>
 <p>Add a <code>VirtualHost</code> entry into apache config that points the <code>DocumentRoot</code> to the
 public folder in the project directory</p>
 <p>OR use <code>php artisan serve</code> to run using the Laravel test server</p>
+
+<h2>Console Application</h2>
+<p>Console application can be used to generate a CSV file of the weather info of any number 
+of cities.</p>
+<p>To run the console application</p>
+<code>php artisan fetchweather [city Names]</code>
+<p>where <code>[city Names]</code> can be replaced with the names of cities that
+are comma separated.</p>
+<p>For example</p>
+<code>php artisan fetchweather Delhi,New York,Sydney</code>
+<p>The output CSV file with weather info from these cities will be generated in the public folder</p>
