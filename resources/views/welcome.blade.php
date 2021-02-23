@@ -9,7 +9,7 @@
     </head>
     <body class="bg-blue-500">
         <div class="relative max-w-2xl w-100 my-10 px-0 py-10 bg-white shadow-lg rounded-3xl sm:max-w-xl sm:mx-auto">
-            <div class="max-w-md mx-auto">
+            <div class="max-w-lg mx-auto">
                 <div id="homePage"></div>
             </div>
         </div>

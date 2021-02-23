@@ -18,14 +18,20 @@ class WeatherServiceProvider extends ServiceProvider
     const DEFAULT_CITY = 'Sydney';
 
     /**
-     * Function will return weather data
+     * Function will return weather data as array
+     * The returened array contains current weather, todays forecast and forecast for next 5 days
+     * @param $cityName
+     * @param $cityId
+     * @return array
      */
     public static function getWeatherData($cityName, $cityId)
     {
+        // fetching the city details
         $city = CityList::where('city_name', $cityName)
             ->where('id', $cityId)
             ->first();
 
+        // failing when city is not present
         if (!$city)
         {
             return [
@@ -34,6 +40,7 @@ class WeatherServiceProvider extends ServiceProvider
             ];
         }
 
+        // fetching weather data
         $weatherData = Http::get(self::API_URL_FORECAST,[
             'appid' => self::API_KEY,
             'lat' => $city->latitude,
@@ -57,6 +64,7 @@ class WeatherServiceProvider extends ServiceProvider
         for($i = 0; $i < 5; $i++)
         {
             $forecastWeather[] = [
+                'date' => Date('d M', $weatherData['daily'][$i+1]['dt']),
                 'minTemperature' => $weatherData['daily'][$i+1]['temp']['min'],
                 'maxTemperature' => $weatherData['daily'][$i+1]['temp']['max'],
                 'windspeed' => $weatherData['daily'][$i+1]['wind_speed'],
@@ -72,8 +80,16 @@ class WeatherServiceProvider extends ServiceProvider
         ];
     }
 
+    /**
+     * Function to fetch weather data from city Names
+     * taking city name as an argument, it fetches the coordinates of first city
+     * in case of more than one cities with same name
+     * @param $cityName String
+     * @return array
+     */
     public static function getWeatherDataByCityName($cityName)
     {
+        // fetching city based on name provided
         $city = CityList::where('city_name', $cityName)
             ->first();
         return self::getWeatherData($city->city_name, $city->id);

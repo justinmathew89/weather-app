@@ -1,0 +1,13 @@
+City,Date,"Min Temp(C)","Max Temp(C)",Weather
+delhi,"23 Feb",19.86,33.32,mist
+delhi,"24 Feb",21.57,34.2,"clear sky"
+delhi,"25 Feb",22.04,34.87,"clear sky"
+delhi,"26 Feb",23.32,34.6,"clear sky"
+delhi,"27 Feb",23.37,32.08,"broken clouds"
+delhi,"28 Feb",22.95,34.46,"clear sky"
+sydney,"23 Feb",16.41,21.51,"light rain"
+sydney,"24 Feb",19.49,25.96,"light rain"
+sydney,"25 Feb",19.62,22.42,"light rain"
+sydney,"26 Feb",19.19,20.55,"moderate rain"
+sydney,"27 Feb",18.68,24.16,"broken clouds"
+sydney,"28 Feb",21.76,26.52,"light rain"

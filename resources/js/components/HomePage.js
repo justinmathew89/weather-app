@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 
 import SearchBar from "./SearchBar";
 import TodaysWeather from "./TodaysWeather";
+import ForecastWeather from "./ForecastWeather";
 import isobject from "isobject";
 import {isString} from "lodash";
 
@@ -15,30 +16,15 @@ class HomePage extends React.Component{
     }
 
     componentDidMount() {
-        // fetches the list of cities for the dropdown
-        this.getCityListData();
         // fetches forcast data for the page initially
         this.getForecastData('Sydney');
-    }
-
-    getCityListData() {
-        fetch("/api/city")
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    this.setState({citiesList:result})
-                },
-                (error) => {
-                    alert('Error');
-                }
-            )
     }
 
     getForecastData(value=null) {
         var cityname = '';
         if (value && isobject(value))
         {
-            cityname = "?cityname="+value.label+"&cityId="+value.value;
+            cityname = "?cityname="+value.city+"&cityId="+value.value;
         }
         else if(isString(value))
         {
@@ -69,13 +55,16 @@ class HomePage extends React.Component{
 
     render () {
         return (
-            <div className="container">
+            <div className="container overflow-hidden">
                 <SearchBar
-                citiesList = {this.state.citiesList}
+                // citiesList = {this.state.citiesList}
                 getForecastData = {this.getForecastData.bind(this)}
                 />
                 <TodaysWeather
                     todaysWeather = {this.state.todaysWeather}
+                />
+                <ForecastWeather
+                    forecastWeather = {this.state.forecastWeather}
                 />
             </div>
         )
