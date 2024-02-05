@@ -2,8 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Exceptions\CityNotFoundException;
+use App\Exceptions\WeatherDataNotFoundException;
 use App\Providers\CitynameServiceProvider;
 use App\Providers\WeatherServiceProvider;
+use App\Services\CityService;
+use App\Services\WeatherService;
 use Illuminate\Console\Command;
 
 class FetchCityWeatherInfo extends Command
@@ -22,13 +26,18 @@ class FetchCityWeatherInfo extends Command
      */
     protected $description = 'Command to generate weather info from the list of cities entered.';
 
+    private $weatherService;
+
     /**
      * Create a new command instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(
+        WeatherService $weatherService
+    )
     {
+        $this->weatherService = $weatherService;
         parent::__construct();
     }
 
@@ -58,43 +67,40 @@ class FetchCityWeatherInfo extends Command
             fputcsv($file,$titleLine);
             foreach ($cityNames as $city)
             {
-                $weatherData = [];
-                if (CitynameServiceProvider::isValidCity($city))
-                {
-                    $weatherData = WeatherServiceProvider::getWeatherDataByCityName($city);
-                    if (!empty($weatherData))
-                    {
-                        // Adding current weather info
-                        $todaysWeather = [
-                            $city,
-                            Date('d M', strtotime('today')),
-                            $weatherData['current_weather']['minTemperature'],
-                            $weatherData['current_weather']['maxTemperature'],
-                            $weatherData['current_weather']['weather'],
-                        ];
-                        fputcsv($file, $todaysWeather);
-
-                        // Adding the forecast weather details
-                        $DayCnt = 1;
-                        foreach ($weatherData['forecast_weather'] as $forecastWeather)
-                        {
-                            $forecast = [
-                                $city,
-                                Date('d M', strtotime('today '. $DayCnt . ' day')),
-                                $forecastWeather['minTemperature'],
-                                $forecastWeather['maxTemperature'],
-                                $forecastWeather['weather'],
-                            ];
-                            fputcsv($file, $forecast);
-                            $DayCnt++;
-                        }
-                    }
-                    // incrementing success count
-                    $successCount++;
+                try {
+                    $weatherData = $this->weatherService->getWeatherofCity($city);
+                } catch (CityNotFoundException | WeatherDataNotFoundException $e) {
+                    $errorCount++;
+                    continue;
                 }
-                else
+                if (!empty($weatherData))
                 {
-                    // incrementing error count
+                    $successCount++;
+                    // Adding current weather info
+                    $todaysWeather = [
+                        $city,
+                        Date('d M', strtotime('today')),
+                        $weatherData['current_weather']['minTemperature'],
+                        $weatherData['current_weather']['maxTemperature'],
+                        $weatherData['current_weather']['weather'],
+                    ];
+                    fputcsv($file, $todaysWeather);
+
+                    // Adding the forecast weather details
+                    $DayCnt = 1;
+                    foreach ($weatherData['forecast_weather'] as $forecastWeather)
+                    {
+                        $forecast = [
+                            $city,
+                            Date('d M', strtotime('today '. $DayCnt . ' day')),
+                            $forecastWeather['minTemperature'],
+                            $forecastWeather['maxTemperature'],
+                            $forecastWeather['weather'],
+                        ];
+                        fputcsv($file, $forecast);
+                        $DayCnt++;
+                    }
+                } else {
                     $errorCount++;
                 }
             }

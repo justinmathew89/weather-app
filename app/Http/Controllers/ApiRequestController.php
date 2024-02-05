@@ -2,69 +2,88 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CityList;
-use App\Providers\CitynameServiceProvider;
-use App\Providers\WeatherServiceProvider;
-use Illuminate\Http\Request;
+use App\Exceptions\CityNotFoundException;
+use App\Exceptions\WeatherDataNotFoundException;
+use App\Http\Requests\CityForecastRequest;
+use App\Services\CityService;
+use App\Services\WeatherService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Log\Logger;
 
 class ApiRequestController extends Controller
 {
+
+    private $weather;
+    private $cityService;
+    private $logger;
+
+    public function __construct(
+        WeatherService $weather,
+        CityService $cityService,
+        Logger $logger
+    )
+    {
+        $this->weather = $weather;
+        $this->cityService = $cityService;
+        $this->logger = $logger;
+    }
+
     /**
      * Function to fetch cities list
      * Returns details of 5 cities for initial display in dropdown
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
-    public function cityList()
+    public function cityList(): JsonResponse
     {
-        return response(CitynameServiceProvider::getCityNames())
-            ->header('Content-Type', 'JSON');
+        return new JsonResponse($this->citySearch());
     }
 
     /**
      * Function to fetch city names based on the user input
      * @param $query String
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
-    public function citySearch($query)
+    public function citySearch(string $query = ''): JsonResponse
     {
-        if (!empty(trim($query)))
+        $returnArray = [];
+        $cities =  $this->cityService->getCityNames($query);
+        foreach($cities as $city)
         {
-            return response(CitynameServiceProvider::searchCityNames($query))
-                ->header('Content-Type', 'JSON');
+            $this->logger->info($city);
+            $returnArray[] = [
+                'label' => $city['city_name'].', '.$city['country'],
+                'city' => $city['city_name'],
+                'country' => $city['country'],
+                'value' => $city['id']
+            ];
         }
-        else
-        {
-            $this->cityList();
-        }
+        return new JsonResponse($returnArray);
     }
 
     /**
      * Function that fetches the weather data based on user selection
-     * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
-    public function forecastList(Request $request)
+    public function forecastList(CityForecastRequest $request): JsonResponse
     {
-        $cityName = trim($request->get('cityname'));
-        $cityId = trim($request->get('cityId'));
-        $isValidCityName = CitynameServiceProvider::isValidCity($cityName);
+        $cityName = data_get($request, 'cityname');
 
-        if ($cityName && $isValidCityName && empty($cityId)) // Fetching the weather details based on user selection
-        {
-            $response = WeatherServiceProvider::getWeatherDatabyCityName($cityName);
-        }
-        else if ($cityName && $isValidCityName) //weather info of default city Sydney
-        {
-            $response = WeatherServiceProvider::getWeatherData($cityName, $cityId);
-        }
-        else //error input
-        {
+        try {
+            $response = $this->weather->getWeatherofCity($cityName);
+        } catch (CityNotFoundException $e) {
             $response = [
                 'code' => 1,
-                'message' => 'Invalid City details provided'
+                'message' => 'Invalid City details provided: ' . $cityName
+            ];
+        } catch (WeatherDataNotFoundException $e) {
+            $response = [
+                'code' => 1,
+                'message' => 'Unable to find weather data for the city : ' . $cityName
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'code' => 1,
+                'message' => 'Some error occured : ' . $e->getMessage()
             ];
         }
-        return response($response)
-            ->header('Content-Type', 'JSON');
+
+        return new JsonResponse($response);
     }
 }
