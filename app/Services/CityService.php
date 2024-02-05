@@ -26,7 +26,7 @@ class CityService
      */
     public static function getCityNames(string $query = '', int $limit = 5): Collection
     {
-        return !empty(trim($query)) ? City::all()->take(5)
+        return empty(trim($query)) ? City::all()->take(5)
                 : City::whereRaw('LOWER(city_name) like "%?%"',[strtolower($query)])
                     ->orWhereRaw('LOWER(country) like "%?%"',[strtolower($query)])
                     ->limit($limit)->get();

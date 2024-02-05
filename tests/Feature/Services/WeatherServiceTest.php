@@ -41,7 +41,7 @@ class WeatherServiceTest extends TestCase
         $this->assertArrayHasKey('current_weather', $weatherData);
         $this->assertArrayHasKey('forecast_weather', $weatherData);
     }
-    public function testGetWeatherDataThrowWeatherDataNotFoundExceptionOnAPIError(): void
+    public function testGetWeatherDataThrowWeatherDataNotFoundExceptionOnApiError(): void
     {
         $cityService = $this->createConfiguredMock(CityService::class,[
             'getCityFromName' => $this->generateValidCity()
