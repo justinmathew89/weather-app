@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Exceptions\CityNotFoundException;
 use App\Exceptions\WeatherDataNotFoundException;
-use App\Services\HTTPService;
+use App\Services\WeatherService;
 use Illuminate\Console\Command;
 
 class FetchCityWeatherInfo extends Command
@@ -31,7 +31,7 @@ class FetchCityWeatherInfo extends Command
      * @return void
      */
     public function __construct(
-        HTTPService $weatherService
+        WeatherService $weatherService
     )
     {
         $this->weatherService = $weatherService;
