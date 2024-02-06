@@ -1,23 +1,17 @@
 <?php
 
-namespace App\Services;
+namespace App\Repository;
 
 use App\Exceptions\CityNotFoundException;
 use App\Models\City;
 use Illuminate\Database\Eloquent\Collection;
 
-class CityService
+class CityRepository
 {
-    /**
-     * @throws CityNotFoundException
-     */
-    public function getCityFromName(string $cityName): City
+    public function getCityFromName(string $cityName): ?City
     {
         // fetching city based on name provided
         $city = City::where('city_name', $cityName)->first();
-        if (empty($city)) {
-            throw new CityNotFoundException();
-        }
         return $city;
     }
 
@@ -27,9 +21,9 @@ class CityService
     public static function getCityNames(string $query = '', int $limit = 5): Collection
     {
         return empty(trim($query)) ? City::all()->take(5)
-                : City::whereRaw('LOWER(city_name) like "%?%"',[strtolower($query)])
-                    ->orWhereRaw('LOWER(country) like "%?%"',[strtolower($query)])
-                    ->limit($limit)->get();
+            : City::whereRaw('LOWER(city_name) like "%?%"',[strtolower($query)])
+                ->orWhereRaw('LOWER(country) like "%?%"',[strtolower($query)])
+                ->limit($limit)->get();
     }
 
 }

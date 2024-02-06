@@ -5,9 +5,10 @@ namespace App\Services;
 use App\Exceptions\CityNotFoundException;
 use App\Exceptions\WeatherDataNotFoundException;
 use App\Models\City;
-use Illuminate\Support\Facades\Http;
+use App\Repository\CityRepository;
+use App\Services\Interfaces\WeatherServiceInterface;
 
-class WeatherService
+class WeatherService implements WeatherServiceInterface
 {
 
     const API_URL_FORECAST = 'http://api.openweathermap.org/data/2.5/onecall';
@@ -15,13 +16,16 @@ class WeatherService
     const API_VALUE_UNIT = 'metric';
     const DEFAULT_CITY = 'Sydney';
 
-    private $cityService;
+    private $cityRepository;
+    private $HTTPService;
 
     public function __construct(
-        CityService $cityService
+        CityRepository $cityRepository,
+        HTTPService $HTTPService
     )
     {
-        $this->cityService = $cityService;
+        $this->cityRepository = $cityRepository;
+        $this->HTTPService = $HTTPService;
     }
 
     /**
@@ -30,14 +34,13 @@ class WeatherService
      */
     private function getWeatherData(City $city): array
     {
-        // fetching weather data
-        $weatherData = Http::get(self::API_URL_FORECAST,[
+        $weatherData = $this->HTTPService->get(self::API_URL_FORECAST,[
             'APPID' => self::API_KEY,
             'lat' => $city['latitude'],
             'lon' => $city['longitude'],
             'units' => self::API_VALUE_UNIT,
             'exclude' => 'hourly,minutely',
-        ])->json();
+        ]);
 
         if (array_key_exists('cod', $weatherData) && array_key_exists('message', $weatherData)) {
             throw new WeatherDataNotFoundException();
@@ -75,14 +78,14 @@ class WeatherService
     }
 
     /**
-     * Function to fetch weather data from city Names
-     * taking city name as an argument, it fetches the coordinates of first city
-     * in case of more than one city with same name
-     * @throws CityNotFoundException | WeatherDataNotFoundException
+     * @inheritDoc
      */
     public function getWeatherofCity(string $cityName): array
     {
-        $city = $this->cityService->getCityFromName($cityName);
+        $city = $this->cityRepository->getCityFromName($cityName);
+        if (empty($city)) {
+            throw new CityNotFoundException();
+        }
         return $this->getWeatherData($city);
     }
 

@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Exceptions\CityNotFoundException;
 use App\Exceptions\WeatherDataNotFoundException;
 use App\Http\Requests\CityForecastRequest;
-use App\Services\CityService;
+use App\Repository\CityRepository;
+use App\Services\HTTPService;
 use App\Services\WeatherService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Log\Logger;
@@ -13,18 +14,18 @@ use Illuminate\Log\Logger;
 class ApiRequestController extends Controller
 {
 
-    private $weather;
-    private $cityService;
+    private $weatherService;
+    private $cityRepository;
     private $logger;
 
     public function __construct(
-        WeatherService $weather,
-        CityService $cityService,
-        Logger $logger
+        WeatherService $weatherService,
+        CityRepository $cityRepository,
+        Logger      $logger
     )
     {
-        $this->weather = $weather;
-        $this->cityService = $cityService;
+        $this->weatherService = $weatherService;
+        $this->cityRepository = $cityRepository;
         $this->logger = $logger;
     }
 
@@ -44,7 +45,7 @@ class ApiRequestController extends Controller
     public function citySearch(string $query = ''): JsonResponse
     {
         $returnArray = [];
-        $cities =  $this->cityService->getCityNames($query);
+        $cities =  $this->cityRepository->getCityNames($query);
         foreach($cities as $city)
         {
             $this->logger->info($city);
@@ -66,7 +67,7 @@ class ApiRequestController extends Controller
         $cityName = data_get($request, 'cityname');
 
         try {
-            $response = $this->weather->getWeatherofCity($cityName);
+            $response = $this->weatherService->getWeatherofCity($cityName);
         } catch (CityNotFoundException $e) {
             $response = [
                 'code' => 1,
